@@ -1,8 +1,8 @@
 # Architecture Design Document (ADD)
 
 ## ARGUS Tactical Mapping System
-**Version:** 2.0  
-**Date:** 2026-07-01  
+**Version:** 2.1  
+**Date:** 2025-07-01  
 **Classification:** UNCLASSIFIED
 
 ---
@@ -59,9 +59,13 @@
 **Responsibilities:**
 - Auto-register device with backend on page load
 - Access device camera for calibration and scanning
-- Guide user through 4-corner room calibration
+- Read gyroscope data (DeviceOrientationEvent) during calibration
+- Capture camera frame as base64 JPEG at each corner mark
+- Guide user through 4-corner room calibration with image+gyro
 - Enter standby mode awaiting deploy command
-- Execute timed camera scan on deploy
+- Execute timed camera scan + RSSI scanning on deploy
+- Simulate BLE RSSI proximity measurements between edge devices
+- Report RSSI measurements to backend
 - Report completion status
 
 **State Machine:**
@@ -80,16 +84,20 @@ REGISTERING → CALIBRATING → STANDBY → SCANNING → COMPLETE
 **Responsibilities:**
 - Display QR code for edge device registration
 - Poll backend for registered devices and calibration status
+- PERSISTENT device list: once registered, devices never disappear (merge-only updates)
+- Show device status with color coding: REGISTERED (gold), CALIBRATING (blue), CALIBRATED (green), DISCONNECTED (red/dimmed)
 - Show real-time device readiness indicators
 - Provide DEPLOY trigger to start scanning phase
-- Render tactical map from scan results
+- Show RSSI data reception during deploy phase
+- Render tactical map using photogrammetry (gyro-based position estimation)
+- Draw RSSI proximity lines between nodes on the map
 - Provide system RESET capability
 - Tab navigation between Calibrate and Map views
 
 **Views:**
-- **Calibrate View**: QR code + device list + Deploy + Reset
-- **Map View**: Canvas-rendered tactical map + legend
-- **Deploy View**: Countdown + recording status (auto-transitions)
+- **Calibrate View**: QR code + persistent device list + Deploy + Reset
+- **Map View**: Canvas-rendered tactical map with photogrammetry positions + RSSI mesh lines
+- **Deploy View**: Countdown + recording/RSSI status (auto-transitions)
 
 ### 2.3 Lambda Function (argus-register)
 
@@ -99,21 +107,25 @@ REGISTERING → CALIBRATING → STANDBY → SCANNING → COMPLETE
 
 **Responsibilities:**
 - Handle device registration (generate UUID, store metadata)
-- Track calibration progress per device
+- Track calibration progress per device (gyro + image storage)
+- Store calibration images in S3 as separate objects (calibration/{nodeId}/corner_N.jpg)
+- Store RSSI proximity measurements between devices
 - Manage system phase (register → scanning)
-- Provide system reset
+- Provide system reset (including calibration image cleanup)
 - CORS handling for cross-origin requests
 
 **API Endpoints:**
 | Method | Path | Purpose |
 |--------|------|---------|
 | POST | /register | Register new edge device |
-| GET | /nodes | List all registered devices |
-| POST | /calibrate | Submit corner calibration data |
-| GET | /calibrations | Get calibration progress |
+| GET | /nodes | List all registered devices with computed status |
+| POST | /calibrate | Submit corner calibration (gyro + base64 image) |
+| GET | /calibrations | Get calibration gyro metadata (no images) |
+| POST | /rssi | Store RSSI measurements from edge device |
+| GET | /rssi | Get all RSSI data |
 | GET | /status | Get current system phase |
 | POST | /deploy | Trigger scanning phase |
-| POST | /reset | Clear all state |
+| POST | /reset | Clear all state + calibration images |
 | OPTIONS | * | CORS preflight |
 
 ### 2.4 API Gateway (argus-api)
@@ -151,16 +163,19 @@ Edge Device                    API Gateway              Lambda
      │                              │                      │
 ```
 
-### 3.2 Calibration Flow
+### 3.2 Calibration Flow (Gyro + Image)
 
 ```
-Edge Device                    API Gateway              Lambda
-     │                              │                      │
-     │── POST /calibrate ─────────►│──── invoke ────────►│
-     │   {nodeId, corner,          │                      │── store timestamp
-     │    timestamp}               │                      │── update progress
-     │◄── 200 {progress} ─────────│◄── response ────────│
-     │                              │                      │
+Edge Device                    API Gateway              Lambda              S3
+     │                              │                      │                 │
+     │── POST /calibrate ─────────►│──── invoke ────────►│                 │
+     │   {nodeId, corner,          │                      │── decode b64    │
+     │    timestamp,               │                      │── PUT image ──►│
+     │    gyro: {alpha,beta,gamma},│                      │   corner_N.jpg  │
+     │    image: base64_jpeg}      │                      │── update meta ─►│
+     │                              │                      │   _calibrations │
+     │◄── 200 {progress} ─────────│◄── response ────────│                 │
+     │                              │                      │                 │
 
 BMS Client                     API Gateway              Lambda
      │                              │                      │
@@ -168,11 +183,11 @@ BMS Client                     API Gateway              Lambda
      │◄── 200 [{nodeId, ...}] ─────│◄── response ────────│── return all nodes
      │                              │                      │
      │── GET /calibrations ────────►│──── invoke ────────►│
-     │◄── 200 {nodeId: [...]} ─────│◄── response ────────│── return progress
+     │◄── 200 {nodeId: {corners}} ─│◄── response ────────│── return gyro data
      │                              │                      │
 ```
 
-### 3.3 Deploy Flow
+### 3.3 Deploy Flow (Camera + RSSI)
 
 ```
 BMS Client                     API Gateway              Lambda
@@ -186,8 +201,27 @@ Edge Device                    API Gateway              Lambda
      │── GET /status ──────────────►│──── invoke ────────►│
      │◄── 200 {phase: scanning} ───│◄── response ────────│── return current phase
      │                              │                      │
-     │── [Start camera, countdown] │                      │
+     │── [Start camera + BLE scan] │                      │
+     │── [5s: capture frames,      │                      │
+     │    scan RSSI from nearby    │                      │
+     │    edge devices]            │                      │
      │                              │                      │
+     │── POST /rssi ───────────────►│──── invoke ────────►│
+     │   {fromNodeId,              │                      │── store RSSI data
+     │    measurements: [          │                      │
+     │      {toNodeId, rssi, dist} │                      │
+     │    ]}                        │                      │
+     │◄── 200 {stored} ───────────│◄── response ────────│
+     │                              │                      │
+
+BMS Client (during deploy)     API Gateway              Lambda
+     │                              │                      │
+     │── GET /rssi ────────────────►│──── invoke ────────►│
+     │◄── 200 {rssi data} ────────│◄── response ────────│── return all RSSI
+     │── [Show RSSI received count]│                      │
+     │                              │                      │
+     │── [After deploy: draw RSSI  │                      │
+     │    proximity lines on map]  │                      │
 ```
 
 ---
@@ -225,9 +259,11 @@ Edge Device                    API Gateway              Lambda
 ### 4.4 Data Protection
 
 - No PII collected (device metadata only)
-- Ephemeral storage (Lambda in-memory)
-- Automatic state expiry (Lambda cold start ~15 min)
-- No data persistence between invocations
+- Persistent storage in S3 (state files + calibration images)
+- S3 lifecycle rule (1 day) auto-cleans demo data
+- Calibration images stored as separate S3 objects (not in JSON payloads on GET)
+- RSSI data contains only device IDs and signal strength (no sensitive data)
+- Manual reset available via POST /reset (clears all state + images)
 
 ---
 
@@ -275,9 +311,14 @@ Deployment:
 | Decision | Rationale |
 |----------|-----------|
 | Serverless architecture | Zero maintenance, auto-scaling, cost-effective for demos |
-| In-memory Lambda storage | Simplicity; no database needed for ephemeral demo data |
+| S3-backed state | Persistent across Lambda cold starts; simple JSON files |
+| S3 image storage | Calibration images stored separately to keep JSON responses small |
 | React SPA | Modern, fast, good mobile support for edge devices |
-| Python Lambda | Simple request routing; no external dependencies needed |
+| Python Lambda | Simple request routing; only boto3 dependency (included in runtime) |
 | Polling (not WebSocket) | Simpler deployment; acceptable latency for demo (2s) |
 | Canvas for map rendering | Full control over tactical visualization; no map library dependency |
 | Monorepo (pnpm + Turbo) | Shared types, coordinated builds, single repo for all components |
+| Gyro-based photogrammetry | Simple position estimation from device orientation at known corners |
+| RSSI mesh (simulated BLE) | Demonstrates proximity awareness; real BLE unreliable in browsers |
+| Persistent device list (nodesRef) | Prevents UI flicker from poll failures; merge-only updates |
+| Base64 image in POST body | Avoids multipart complexity; images small enough (~50KB JPEG) |

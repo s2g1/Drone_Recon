@@ -1,0 +1,653 @@
+{
+  "/ArgusStack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+    {
+      "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+      "data": true
+    }
+  ],
+  "/ArgusStack/ArgusService": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "Enable the 'circuitBreaker' property to trigger a quicker deployment failure if tasks are failing to come start (without this setting deployments may take up to 3 hours to fail). [ack: @aws-cdk/aws-ecs:shouldUseCircuitBreaker]",
+      "trace": [
+        "Annotations.addMessage (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:3441)",
+        "Annotations.addWarningV2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:2129)",
+        "new BaseService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\base\\base-service.js:1:14671)",
+        "new BaseService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\no-box-stack-traces.js:1:345)",
+        "new FargateService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\fargate\\fargate-service.js:1:7829)",
+        "new FargateService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:855)",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:113:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "ModuleJob.run (node:internal/modules/esm/module_job:274:25)",
+        "async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)",
+        "async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)"
+      ]
+    },
+    {
+      "type": "aws:cdk:warning",
+      "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+      "trace": [
+        "Annotations.addMessage (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:3441)",
+        "Annotations.addWarningV2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:2129)",
+        "new BaseService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\base\\base-service.js:1:16295)",
+        "new BaseService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\no-box-stack-traces.js:1:345)",
+        "new FargateService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\fargate\\fargate-service.js:1:7829)",
+        "new FargateService2 (C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:855)",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:113:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "ModuleJob.run (node:internal/modules/esm/module_job:274:25)",
+        "async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)",
+        "async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)"
+      ]
+    }
+  ],
+  "/ArgusStack/AlbDnsName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AlbDnsName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:146:5)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/EcrRepositoryUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepositoryUri"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:151:5)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ClusterArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ClusterArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:156:5)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/BucketName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BucketName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:202:5)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/DistributionDomainName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "DistributionDomainName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:207:5)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcDD742061"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:29:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/IGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcIGW875AE897"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:29:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/VPCGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcVPCGW9625EBD6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Vpc2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:29:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusRepository/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusRepositoryBCF23CF3"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Repository2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:42:23)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusBucket7AE665D8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:55:19)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketAutoDeleteObjects"
+      }
+    }
+  ],
+  "/ArgusStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusCluster/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusCluster2751E848"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Cluster2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:67:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTaskDef/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTaskDef6214E625"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateTaskDefinition2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:73:28)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusAlb/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusAlb62FC2F02"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ApplicationLoadBalancer2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:106:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusService/Service": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusService73950060"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateService2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:113:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTargetGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTargetGroupBCA424EA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ApplicationTargetGroup2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:122:25)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusOAI/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusOAI478D496F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new OriginAccessIdentity2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:162:34)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusDistribution/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusDistribution65ACD948"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Distribution2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:169:25)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...App.synth in .pnpm...",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:15:5)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet1Subnet434BF53C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet1RouteTableD94B4101"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet1RouteTableAssociationC31BD1D9"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet1DefaultRoute4CAA9620"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:208 in .pnpm...",
+        "Array.forEach (:)",
+        "...new Vpc2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:29:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet2SubnetB1FC5E09"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet2RouteTable52E45A52"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet2RouteTableAssociationDEE295E0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:268 in .pnpm...",
+        "Array.forEach (:)",
+        "....pnpm..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusVpc/PublicSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusVpcPublicSubnet2DefaultRoute490BA205"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\participant\\workshop2\\node_modules\\.pnpm\\aws-cdk-lib@2.260.0_constructs@10.6.0\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:208 in .pnpm...",
+        "Array.forEach (:)",
+        "...new Vpc2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:29:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusBucket/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusBucketPolicy2F8A4162"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new Bucket2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:55:19)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    },
+    {
+      "type": "aws:cdk:analytics:mixin",
+      "data": {
+        "mixin": "aws-cdk-lib.aws_s3.mixins.BucketPolicyStatements"
+      }
+    }
+  ],
+  "/ArgusStack/ArgusBucket/AutoDeleteObjectsCustomResource/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusBucketAutoDeleteObjectsCustomResource4DD82B37"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTaskDef/TaskRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTaskDefTaskRole6FF22F6F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateTaskDefinition2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:73:28)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTaskDef/ExecutionRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTaskDefExecutionRole25686850"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusAlb/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusAlbSecurityGroupEA28B45C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new ApplicationLoadBalancer2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:106:16)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusAlb/SecurityGroup/to ArgusStackArgusServiceSecurityGroupC9FD7CA1:3000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusAlbSecurityGrouptoArgusStackArgusServiceSecurityGroupC9FD7CA130008E86494B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusAlb/HttpListener/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusAlbHttpListenerF03CFEC0"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:140:14)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusService/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusServiceSecurityGroupC03239E6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...new FargateService2 in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:113:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)",
+        "...node internals..."
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusService/SecurityGroup/from ArgusStackArgusAlbSecurityGroup1D2A79BF:3000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusServiceSecurityGroupfromArgusStackArgusAlbSecurityGroup1D2A79BF30000B2D0241"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTaskDef/ArgusContainer/LogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTaskDefArgusContainerLogGroupA3A6407B"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...WrappedClass.<anonymous> in .pnpm...",
+        "new ArgusStack (C:\\Users\\participant\\workshop2\\packages\\infra\\lib\\argus-stack.ts:91:20)",
+        "<anonymous> (C:\\Users\\participant\\workshop2\\packages\\infra\\bin\\argus-infra.ts:7:1)"
+      ]
+    }
+  ],
+  "/ArgusStack/ArgusTaskDef/ExecutionRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ArgusTaskDefExecutionRoleDefaultPolicyA290C952"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "....pnpm...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ]
+}

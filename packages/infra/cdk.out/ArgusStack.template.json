@@ -1,0 +1,1163 @@
+{
+ "Description": "ARGUS Live Demo - ECS Fargate deployment with ALB and ECR",
+ "Resources": {
+  "ArgusVpcDD742061": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/Resource"
+   }
+  },
+  "ArgusVpcPublicSubnet1Subnet434BF53C": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet1/Subnet"
+   }
+  },
+  "ArgusVpcPublicSubnet1RouteTableD94B4101": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "ArgusVpcPublicSubnet1RouteTableAssociationC31BD1D9": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ArgusVpcPublicSubnet1RouteTableD94B4101"
+    },
+    "SubnetId": {
+     "Ref": "ArgusVpcPublicSubnet1Subnet434BF53C"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "ArgusVpcPublicSubnet1DefaultRoute4CAA9620": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ArgusVpcIGW875AE897"
+    },
+    "RouteTableId": {
+     "Ref": "ArgusVpcPublicSubnet1RouteTableD94B4101"
+    }
+   },
+   "DependsOn": [
+    "ArgusVpcVPCGW9625EBD6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "ArgusVpcPublicSubnet2SubnetB1FC5E09": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet2/Subnet"
+   }
+  },
+  "ArgusVpcPublicSubnet2RouteTable52E45A52": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "ArgusVpcPublicSubnet2RouteTableAssociationDEE295E0": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "ArgusVpcPublicSubnet2RouteTable52E45A52"
+    },
+    "SubnetId": {
+     "Ref": "ArgusVpcPublicSubnet2SubnetB1FC5E09"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "ArgusVpcPublicSubnet2DefaultRoute490BA205": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "ArgusVpcIGW875AE897"
+    },
+    "RouteTableId": {
+     "Ref": "ArgusVpcPublicSubnet2RouteTable52E45A52"
+    }
+   },
+   "DependsOn": [
+    "ArgusVpcVPCGW9625EBD6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "ArgusVpcIGW875AE897": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "ArgusStack/ArgusVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/IGW"
+   }
+  },
+  "ArgusVpcVPCGW9625EBD6": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "ArgusVpcIGW875AE897"
+    },
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusVpc/VPCGW"
+   }
+  },
+  "ArgusRepositoryBCF23CF3": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "EmptyOnDelete": true,
+    "LifecyclePolicy": {
+     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Keep only 5 most recent images\",\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":5},\"action\":{\"type\":\"expire\"}}]}"
+    },
+    "RepositoryName": "argus-live-demo"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusRepository/Resource"
+   }
+  },
+  "ArgusBucket7AE665D8": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "ExpirationInDays": 1,
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": true,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": true
+    },
+    "Tags": [
+     {
+      "Key": "aws-cdk:auto-delete-objects",
+      "Value": "true"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusBucket/Resource"
+   }
+  },
+  "ArgusBucketPolicy2F8A4162": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "ArgusBucket7AE665D8"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutBucketPolicy",
+        "s3:GetBucket*",
+        "s3:List*",
+        "s3:DeleteObject*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": {
+         "Fn::GetAtt": [
+          "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+          "Arn"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ArgusBucket7AE665D8",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ArgusBucket7AE665D8",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": [
+        "s3:GetObject*",
+        "s3:GetBucket*",
+        "s3:List*"
+       ],
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ArgusOAI478D496F",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "ArgusBucket7AE665D8",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Fn::GetAtt": [
+             "ArgusBucket7AE665D8",
+             "Arn"
+            ]
+           },
+           "/*"
+          ]
+         ]
+        }
+       ]
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": {
+        "CanonicalUser": {
+         "Fn::GetAtt": [
+          "ArgusOAI478D496F",
+          "S3CanonicalUserId"
+         ]
+        }
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ArgusBucket7AE665D8",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusBucket/Policy/Resource"
+   }
+  },
+  "ArgusBucketAutoDeleteObjectsCustomResource4DD82B37": {
+   "Type": "Custom::S3AutoDeleteObjects",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F",
+      "Arn"
+     ]
+    },
+    "BucketName": {
+     "Ref": "ArgusBucket7AE665D8"
+    }
+   },
+   "DependsOn": [
+    "ArgusBucketPolicy2F8A4162"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusBucket/AutoDeleteObjectsCustomResource/Default"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Version": "2012-10-17",
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ]
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Sub": "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role"
+   }
+  },
+  "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-361274344489-us-east-1",
+     "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
+    },
+    "Timeout": 900,
+    "MemorySize": 128,
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs24.x",
+    "Description": {
+     "Fn::Join": [
+      "",
+      [
+       "Lambda function for auto-deleting objects in ",
+       {
+        "Ref": "ArgusBucket7AE665D8"
+       },
+       " S3 bucket."
+      ]
+     ]
+    }
+   },
+   "DependsOn": [
+    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+    "aws:asset:path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+    "aws:asset:property": "Code"
+   }
+  },
+  "ArgusCluster2751E848": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "argus-cluster"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusCluster/Resource"
+   }
+  },
+  "ArgusTaskDefTaskRole6FF22F6F": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTaskDef/TaskRole/Resource"
+   }
+  },
+  "ArgusTaskDef6214E625": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Cpu": 2048,
+      "Environment": [
+       {
+        "Name": "NODE_ENV",
+        "Value": "production"
+       },
+       {
+        "Name": "HTTP_PORT",
+        "Value": "3000"
+       },
+       {
+        "Name": "HTTPS_PORT",
+        "Value": "3443"
+       },
+       {
+        "Name": "AWS_STORAGE_ENABLED",
+        "Value": "false"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "ArgusRepositoryBCF23CF3",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "ArgusRepositoryBCF23CF3",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Ref": "ArgusRepositoryBCF23CF3"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ArgusTaskDefArgusContainerLogGroupA3A6407B"
+        },
+        "awslogs-stream-prefix": "argus",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Memory": 4096,
+      "Name": "ArgusContainer",
+      "PortMappings": [
+       {
+        "ContainerPort": 3000,
+        "Protocol": "tcp"
+       },
+       {
+        "ContainerPort": 3443,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "2048",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ArgusTaskDefExecutionRole25686850",
+      "Arn"
+     ]
+    },
+    "Family": "ArgusStackArgusTaskDef8AB1AA09",
+    "Memory": "4096",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "ArgusTaskDefTaskRole6FF22F6F",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTaskDef/Resource"
+   }
+  },
+  "ArgusTaskDefArgusContainerLogGroupA3A6407B": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTaskDef/ArgusContainer/LogGroup/Resource"
+   }
+  },
+  "ArgusTaskDefExecutionRole25686850": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTaskDef/ExecutionRole/Resource"
+   }
+  },
+  "ArgusTaskDefExecutionRoleDefaultPolicyA290C952": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ArgusRepositoryBCF23CF3",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ArgusTaskDefArgusContainerLogGroupA3A6407B",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ArgusTaskDefExecutionRoleDefaultPolicyA290C952",
+    "Roles": [
+     {
+      "Ref": "ArgusTaskDefExecutionRole25686850"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ArgusAlb62FC2F02": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Name": "argus-alb",
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "ArgusAlbSecurityGroupEA28B45C",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "ArgusVpcPublicSubnet1Subnet434BF53C"
+     },
+     {
+      "Ref": "ArgusVpcPublicSubnet2SubnetB1FC5E09"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "ArgusVpcPublicSubnet1DefaultRoute4CAA9620",
+    "ArgusVpcPublicSubnet1RouteTableAssociationC31BD1D9",
+    "ArgusVpcPublicSubnet2DefaultRoute490BA205",
+    "ArgusVpcPublicSubnet2RouteTableAssociationDEE295E0"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusAlb/Resource"
+   }
+  },
+  "ArgusAlbSecurityGroupEA28B45C": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB ArgusStackArgusAlb6D4321A4",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusAlb/SecurityGroup/Resource"
+   }
+  },
+  "ArgusAlbSecurityGrouptoArgusStackArgusServiceSecurityGroupC9FD7CA130008E86494B": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ArgusServiceSecurityGroupC03239E6",
+      "GroupId"
+     ]
+    },
+    "FromPort": 3000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ArgusAlbSecurityGroupEA28B45C",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 3000
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusAlb/SecurityGroup/to ArgusStackArgusServiceSecurityGroupC9FD7CA1:3000"
+   }
+  },
+  "ArgusAlbHttpListenerF03CFEC0": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "ArgusTargetGroupBCA424EA"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "ArgusAlb62FC2F02"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusAlb/HttpListener/Resource"
+   }
+  },
+  "ArgusService73950060": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ArgusCluster2751E848"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "ArgusContainer",
+      "ContainerPort": 3000,
+      "TargetGroupArn": {
+       "Ref": "ArgusTargetGroupBCA424EA"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "ENABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ArgusServiceSecurityGroupC03239E6",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "ArgusVpcPublicSubnet1Subnet434BF53C"
+       },
+       {
+        "Ref": "ArgusVpcPublicSubnet2SubnetB1FC5E09"
+       }
+      ]
+     }
+    },
+    "ServiceName": "argus-service",
+    "TaskDefinition": {
+     "Ref": "ArgusTaskDef6214E625"
+    }
+   },
+   "DependsOn": [
+    "ArgusAlbHttpListenerF03CFEC0",
+    "ArgusTaskDefTaskRole6FF22F6F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusService/Service"
+   }
+  },
+  "ArgusServiceSecurityGroupC03239E6": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "ArgusStack/ArgusService/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "DependsOn": [
+    "ArgusTaskDefTaskRole6FF22F6F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusService/SecurityGroup/Resource"
+   }
+  },
+  "ArgusServiceSecurityGroupfromArgusStackArgusAlbSecurityGroup1D2A79BF30000B2D0241": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 3000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ArgusServiceSecurityGroupC03239E6",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ArgusAlbSecurityGroupEA28B45C",
+      "GroupId"
+     ]
+    },
+    "ToPort": 3000
+   },
+   "DependsOn": [
+    "ArgusTaskDefTaskRole6FF22F6F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusService/SecurityGroup/from ArgusStackArgusAlbSecurityGroup1D2A79BF:3000"
+   }
+  },
+  "ArgusTargetGroupBCA424EA": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 30,
+    "HealthCheckPath": "/healthz",
+    "HealthCheckTimeoutSeconds": 5,
+    "HealthyThresholdCount": 2,
+    "Port": 3000,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "true"
+     },
+     {
+      "Key": "stickiness.type",
+      "Value": "lb_cookie"
+     },
+     {
+      "Key": "stickiness.lb_cookie.duration_seconds",
+      "Value": "3600"
+     }
+    ],
+    "TargetType": "ip",
+    "UnhealthyThresholdCount": 3,
+    "VpcId": {
+     "Ref": "ArgusVpcDD742061"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusTargetGroup/Resource"
+   }
+  },
+  "ArgusOAI478D496F": {
+   "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+   "Properties": {
+    "CloudFrontOriginAccessIdentityConfig": {
+     "Comment": "OAI for ARGUS S3 bucket"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusOAI/Resource"
+   }
+  },
+  "ArgusDistribution65ACD948": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "CacheBehaviors": [
+      {
+       "AllowedMethods": [
+        "GET",
+        "HEAD",
+        "OPTIONS",
+        "PUT",
+        "PATCH",
+        "POST",
+        "DELETE"
+       ],
+       "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+       "Compress": true,
+       "PathPattern": "/upload/*",
+       "TargetOriginId": "ArgusStackArgusDistributionOrigin2D930B273",
+       "ViewerProtocolPolicy": "redirect-to-https"
+      }
+     ],
+     "CustomErrorResponses": [
+      {
+       "ErrorCode": 403,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      },
+      {
+       "ErrorCode": 404,
+       "ResponseCode": 200,
+       "ResponsePagePath": "/index.html"
+      }
+     ],
+     "DefaultCacheBehavior": {
+      "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+      "Compress": true,
+      "TargetOriginId": "ArgusStackArgusDistributionOrigin14721B360",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "DefaultRootObject": "index.html",
+     "Enabled": true,
+     "HttpVersion": "http2",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "ArgusBucket7AE665D8",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "ArgusStackArgusDistributionOrigin14721B360",
+       "S3OriginConfig": {
+        "OriginAccessIdentity": {
+         "Fn::Join": [
+          "",
+          [
+           "origin-access-identity/cloudfront/",
+           {
+            "Ref": "ArgusOAI478D496F"
+           }
+          ]
+         ]
+        }
+       }
+      },
+      {
+       "CustomOriginConfig": {
+        "OriginProtocolPolicy": "http-only",
+        "OriginSSLProtocols": [
+         "TLSv1.2"
+        ]
+       },
+       "DomainName": {
+        "Fn::GetAtt": [
+         "ArgusAlb62FC2F02",
+         "DNSName"
+        ]
+       },
+       "Id": "ArgusStackArgusDistributionOrigin2D930B273"
+      }
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/ArgusDistribution/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/5VSwW7bMAz9luasaJ0L9LCbk6xFgAIJ4qKXYRhkmfGYKJIhUskCw/8+yEpidysG7KT3HilSfFQms8d7eX+nTjTV1X5qsJRtwUrvhTrRjxZ0Jtu3Rov51r6t52IdSoO6CKUFjtqANi4wvKrSwKAPWk7kNCpGZ2/JESwtg7fAz4rhpM6XNheWMyv98wCWRQE6eOTzs3eh6Rv8U/haeyD6S17aXu8EaC/bDTSOkJ3v2w6sE/Qg21nQ+zRZQt/ayQF/oZ18mYzNii7Rg+xDJFNqHtgtwADDqtyBZpp030UKrZ1BfR6qJv4ftdOFghVDNCaWjuOQbOcmEIOPta/wSflaxQ3QfgFbtHj1/0/FWVZowY+0y90C/BF12mmCnUB1kO3GpU335zBWQp0wribZvrj6tqAr7gQYRYzaOFWVyiir0dbHTLZ50xjU/Sd5caqa9bE00Ts+zkNisJecKx7FX5WvgW9vGNFOaONCtfXOsmxXHmu0udZAtKzAMvI5OelC9RRzPsxYILHHMlx9HfOuExsgF3x0LxC7w0Djd/swtPbuiBX4mSIQORFwwapGW8c7q8BN4E5YV4Hc0adjlsnPj/L+bkeIUx8s4wHkJp2/AQyy3D3aAwAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ArgusStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "AlbDnsName": {
+   "Description": "ALB DNS name for ARGUS system",
+   "Value": {
+    "Fn::GetAtt": [
+     "ArgusAlb62FC2F02",
+     "DNSName"
+    ]
+   }
+  },
+  "EcrRepositoryUri": {
+   "Description": "ECR repository URI for Docker image push",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "ArgusRepositoryBCF23CF3",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "ArgusRepositoryBCF23CF3",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ArgusRepositoryBCF23CF3"
+      }
+     ]
+    ]
+   }
+  },
+  "ClusterArn": {
+   "Description": "ECS cluster ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "ArgusCluster2751E848",
+     "Arn"
+    ]
+   }
+  },
+  "BucketName": {
+   "Description": "S3 bucket name for video uploads and composite output",
+   "Value": {
+    "Ref": "ArgusBucket7AE665D8"
+   }
+  },
+  "DistributionDomainName": {
+   "Description": "CloudFront distribution domain name",
+   "Value": {
+    "Fn::GetAtt": [
+     "ArgusDistribution65ACD948",
+     "DomainName"
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": ".",
+    "module": "ESNext",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*", "lib/**/*", "bin/**/*"],
+  "exclude": ["node_modules", "dist", "cdk.out"],
+  "references": [
+    { "path": "../shared" }
+  ]
+}

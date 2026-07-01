@@ -1,0 +1,42 @@
+:root {
+  --bms-bg: #050D1A;
+  --bms-green: #00FF9C;
+  --bms-blue: #00BFFF;
+  --bms-font: 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--bms-bg);
+  color: var(--bms-green);
+  font-family: var(--bms-font);
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--bms-blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: var(--bms-font);
+  cursor: pointer;
+}

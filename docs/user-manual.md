@@ -6,7 +6,7 @@
 
 ## BMS Interface
 
-![BMS Calibration Screen](../docs/screenshots/bms-calibration.png)
+![BMS Calibration Screen](screenshots/Calibration%20Screen.PNG)
 
 The BMS screen shows:
 - **Corner markers (1-4)** — Large green numbered circles at screen corners for device calibration
@@ -20,7 +20,7 @@ The BMS screen shows:
 
 ## Tactical Map View
 
-![BMS Tactical Map](../docs/screenshots/bms-tactical-map.png)
+![BMS Tactical Map](screenshots/Map%20Screen.PNG)
 
 After clicking DEPLOY, the MAP tab shows the live tactical view:
 - **Green nodes** — Active, sending RSSI pings within the last 6 seconds

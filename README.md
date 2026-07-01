@@ -4,9 +4,9 @@ A real-time tactical mapping system that turns mobile phones into sensor nodes f
 
 Built in a single session using AI-assisted development with Kiro.
 
-![BMS Calibration Screen](docs/screenshots/bms-calibration.png)
+![BMS Calibration Screen](docs/screenshots/Calibration%20Screen.PNG)
 
-![BMS Tactical Map — Live RSSI Mesh](docs/screenshots/bms-tactical-map.png)
+![BMS Tactical Map — Live RSSI Mesh](docs/screenshots/Map%20Screen.PNG)
 
 ## Demo
 

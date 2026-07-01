@@ -5,7 +5,7 @@ function getServerUrl(): string {
   return params.get('server') || 'https://ksxaeu4eb8.execute-api.us-east-1.amazonaws.com';
 }
 
-type AppStep = 'registering' | 'calibrating' | 'standby' | 'scanning' | 'complete' | 'error';
+type AppStep = 'registering' | 'calibrating' | 'standby' | 'scanning' | 'error';
 
 interface GyroData {
   alpha: number;
@@ -18,7 +18,6 @@ function App() {
   const [nodeId, setNodeId] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [calibrationCorner, setCalibrationCorner] = useState(0);
-  const [countdown, setCountdown] = useState(5);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [gyro, setGyro] = useState<GyroData>({ alpha: 0, beta: 0, gamma: 0 });
   const [rssiResults, setRssiResults] = useState<{ toNodeId: string; rssi: number; distance: number }[]>([]);
@@ -26,7 +25,6 @@ function App() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const calibrationVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gyroRef = useRef<GyroData>({ alpha: 0, beta: 0, gamma: 0 });
   const serverUrl = getServerUrl();
 
@@ -192,9 +190,8 @@ function App() {
     return [];
   };
 
-  // Step 4: Camera + RSSI scan during 5s window
+  // Step 4: Start camera when entering scanning state
   const startScanPhase = async () => {
-    // Start camera
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -204,54 +201,34 @@ function App() {
         videoRef.current.play();
       }
     } catch {}
-
-    // Fetch all nodes for RSSI simulation
-    const nodes = await fetchAllNodes();
-
-    // Simulate RSSI scanning (BLE not reliably available in browsers)
-    const otherNodes = nodes.filter(n => n.nodeId !== nodeId);
-    const measurements = otherNodes.map((n, idx) => {
-      // Simulate RSSI based on registration order distance
-      const rssi = -40 - Math.floor(Math.random() * 30) - (idx * 5);
-      const distance = Math.round((10 ** ((-40 - rssi) / 20)) * 100) / 100;
-      return { toNodeId: n.nodeId, rssi, distance };
-    });
-    setRssiResults(measurements);
-
-    // Countdown
-    let t = 5;
-    setCountdown(5);
-    countdownRef.current = setInterval(() => {
-      t -= 1;
-      setCountdown(t);
-      if (t <= 0) {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-        // Stop camera
-        if (videoRef.current && videoRef.current.srcObject) {
-          const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-          tracks.forEach(track => track.stop());
-        }
-        // Report RSSI data
-        reportRssi(measurements);
-        setStep('complete');
-      }
-    }, 1000);
   };
 
-  // Report RSSI measurements to server
-  const reportRssi = async (measurements: { toNodeId: string; rssi: number; distance: number }[]) => {
-    try {
-      await fetch(`${serverUrl}/rssi`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fromNodeId: nodeId,
-          measurements,
-          timestamp: Date.now(),
-        }),
-      });
-    } catch {}
-  };
+  // Continuous RSSI ping every 2 seconds while in scanning state
+  useEffect(() => {
+    if (step !== 'scanning') return;
+
+    const interval = setInterval(async () => {
+      const nodes = await fetchAllNodes();
+      const otherNodes = nodes.filter(n => n.nodeId !== nodeId);
+      const measurements = otherNodes.map((n, idx) => ({
+        toNodeId: n.nodeId,
+        rssi: -40 - Math.floor(Math.random() * 30) - (idx * 3),
+        distance: Math.round((10 ** ((-40 - (-40 - Math.floor(Math.random() * 30) - (idx * 3))) / 20)) * 100) / 100,
+      }));
+
+      try {
+        await fetch(`${serverUrl}/rssi`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fromNodeId: nodeId, measurements, timestamp: Date.now() }),
+        });
+      } catch {}
+
+      setRssiResults(measurements);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [step, nodeId, serverUrl]);
 
   const cornerNames = ['TOP-LEFT', 'TOP-RIGHT', 'BOTTOM-RIGHT', 'BOTTOM-LEFT'];
 
@@ -339,15 +316,15 @@ function App() {
     );
   }
 
-  // ─── SCANNING (with RSSI overlay) ───
+  // ─── SCANNING (persistent RSSI with overlay) ───
   if (step === 'scanning') {
     return (
       <div style={{ ...styles.container, padding: 0 }}>
         {hiddenCanvas}
         <video ref={videoRef} playsInline muted style={{ width: '100%', height: '100vh', objectFit: 'cover' }} />
         <div style={styles.scanOverlay}>
-          <div style={styles.scanBadge}><span style={{ color: '#FF4040' }}>●</span> RECORDING</div>
-          <div style={styles.scanCountdown}>{countdown}s</div>
+          <div style={styles.scanBadge}><span style={{ color: '#00FF9C', animation: 'pulse 1.5s infinite' }}>●</span> SCANNING — RSSI ACTIVE</div>
+          <div style={styles.scanCountdown}>{nodeId.substring(0, 6)}</div>
         </div>
         {/* RSSI callout labels */}
         <div style={styles.rssiOverlay}>
@@ -364,33 +341,21 @@ function App() {
             </div>
           ))}
           {rssiResults.length > 0 && (
-            <div style={styles.rssiLabel}>BLE RSSI SCAN</div>
+            <div style={styles.rssiLabel}>BLE RSSI SCAN — LIVE</div>
           )}
         </div>
       </div>
     );
   }
 
-  // ─── COMPLETE ───
+  // ─── FALLBACK ───
   return (
     <div style={styles.container}>
       {hiddenCanvas}
       <div style={{ fontSize: '48px', color: '#00FF9C' }}>✓</div>
-      <h2 style={styles.title}>Scan complete</h2>
-      <p style={styles.message}>Data captured • RSSI reported</p>
+      <h2 style={styles.title}>ARGUS Node Active</h2>
+      <p style={styles.message}>Device registered</p>
       <div style={styles.badge}>{nodeId.substring(0, 8)}</div>
-      {rssiResults.length > 0 && (
-        <div style={styles.rssiSummary}>
-          <div style={{ fontSize: '10px', color: '#00BFFF', letterSpacing: '2px', marginBottom: '6px' }}>
-            RSSI MEASUREMENTS
-          </div>
-          {rssiResults.map(m => (
-            <div key={m.toNodeId} style={{ fontSize: '11px', color: '#888' }}>
-              → {m.toNodeId.substring(0, 8)}: {m.rssi} dBm ({m.distance}m)
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -508,7 +473,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    border: '1px solid #FF404060',
+    border: '1px solid #00FF9C60',
   },
   scanCountdown: {
     background: 'rgba(0,0,0,0.8)',

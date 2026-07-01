@@ -46,16 +46,11 @@ export const App: React.FC = () => {
   const [nodes, setNodes] = useState<RegisteredNode[]>([]);
   const [calibrations, setCalibrations] = useState<CalibrationData>({});
   const [rssiData, setRssiData] = useState<RssiData>({});
-  const [countdown, setCountdown] = useState(5);
   const [loaded, setLoaded] = useState(false);
-  const [rssiReceived, setRssiReceived] = useState(0);
   const nodesRef = useRef<RegisteredNode[]>([]);
-  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Poll for nodes and calibrations every 2s - PERSISTENT merge
   useEffect(() => {
-    if (phase === 'deploy') return; // still poll during mapping
-
     const poll = () => {
       fetch(`${SERVER_URL}/nodes`)
         .then(res => res.ok ? res.json() : null)
@@ -95,7 +90,6 @@ export const App: React.FC = () => {
         .then(data => {
           if (data && typeof data === 'object') {
             setRssiData(data);
-            setRssiReceived(Object.keys(data).length);
           }
         })
         .catch(() => {});
@@ -132,8 +126,6 @@ export const App: React.FC = () => {
   };
 
   const handleDeploy = useCallback(async () => {
-    setPhase('deploy');
-    setCountdown(5);
     try {
       await fetch(`${SERVER_URL}/deploy`, {
         method: 'POST',
@@ -141,24 +133,12 @@ export const App: React.FC = () => {
         body: JSON.stringify({ action: 'start_scan', timestamp: Date.now() }),
       });
     } catch {}
-
-    let t = 5;
-    countdownRef.current = setInterval(() => {
-      t -= 1;
-      setCountdown(t);
-      if (t <= 0) {
-        if (countdownRef.current) clearInterval(countdownRef.current);
-        setPhase('mapping');
-        setActiveTab('map');
-      }
-    }, 1000);
-  }, []);
-
-  const handleSkipToMapping = () => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
+    // Immediately go to map — no countdown
     setPhase('mapping');
     setActiveTab('map');
-  };
+  }, []);
+
+
 
   const handleReset = async () => {
     try {
@@ -168,7 +148,6 @@ export const App: React.FC = () => {
     setNodes([]);
     setCalibrations({});
     setRssiData({});
-    setRssiReceived(0);
     setLoaded(false);
     setPhase('register_calibrate');
     setActiveTab('calibrate');
@@ -181,13 +160,13 @@ export const App: React.FC = () => {
         <div style={styles.headerTabs}>
           <button
             style={activeTab === 'calibrate' ? styles.tabActive : styles.tabInactive}
-            onClick={() => { setActiveTab('calibrate'); if (phase !== 'deploy') setPhase('register_calibrate'); }}
+            onClick={() => { setActiveTab('calibrate'); setPhase('register_calibrate'); }}
           >
             CALIBRATE
           </button>
           <button
             style={activeTab === 'map' ? styles.tabActive : styles.tabInactive}
-            onClick={() => { setActiveTab('map'); if (phase !== 'deploy') setPhase('mapping'); }}
+            onClick={() => { setActiveTab('map'); setPhase('mapping'); }}
           >
             MAP
           </button>
@@ -198,10 +177,7 @@ export const App: React.FC = () => {
       </div>
 
       <div style={styles.main}>
-        {phase === 'deploy' && (
-          <PhaseDeploy nodes={nodes} countdown={countdown} rssiReceived={rssiReceived} onSkip={handleSkipToMapping} />
-        )}
-        {phase !== 'deploy' && activeTab === 'calibrate' && (
+        {activeTab === 'calibrate' && (
           <PhaseRegisterCalibrate
             nodes={nodes}
             loaded={loaded}
@@ -212,13 +188,13 @@ export const App: React.FC = () => {
             onReset={handleReset}
           />
         )}
-        {phase !== 'deploy' && activeTab === 'map' && (
+        {activeTab === 'map' && (
           <PhaseMapping nodes={nodes} calibrations={calibrations} rssiData={rssiData} onReset={handleReset} />
         )}
       </div>
 
       <div style={styles.footer}>
-        <span>ARGUS TACTICAL SYSTEM v2.1</span>
+        <span>ARGUS TACTICAL SYSTEM v2.2</span>
         <span>{OPERATOR_KEY}</span>
         <span>NODES: {nodes.length}</span>
       </div>
@@ -312,45 +288,42 @@ const PhaseRegisterCalibrate: React.FC<{
   );
 };
 
-/* ─── Phase 2: Deploy (Scanning + RSSI) ─── */
-const PhaseDeploy: React.FC<{
-  nodes: RegisteredNode[];
-  countdown: number;
-  rssiReceived: number;
-  onSkip: () => void;
-}> = ({ nodes, countdown, rssiReceived, onSkip }) => (
-  <div style={styles.phaseContainer}>
-    <div style={styles.deployCenter}>
-      <div style={styles.scanningPulse} />
-      <div style={styles.deployTitle}>DEPLOYING — Cameras + RSSI Active</div>
-      <div style={styles.countdownDisplay}>{countdown}s</div>
-      <div style={styles.rssiStatus}>
-        RSSI DATA RECEIVED: <span style={{ color: '#00FF9C' }}>{rssiReceived}</span> / {nodes.length} nodes
-      </div>
-      <div style={styles.scanningDevices}>
-        {nodes.map((node, i) => (
-          <div key={node.nodeId} style={styles.scanningDeviceRow}>
-            <span style={{ color: '#FF4040', fontSize: '14px' }}>●</span>
-            <span style={styles.deviceId}>NODE-{(i + 1).toString().padStart(2, '0')}</span>
-            <span style={styles.recordingLabel}>RECORDING + RSSI</span>
-          </div>
-        ))}
-      </div>
-      <button style={styles.skipBtn} onClick={onSkip}>
-        SKIP TO MAPPING →
-      </button>
-    </div>
-  </div>
-);
+/* ─── Phase 3: Mapping (Photogrammetry + RSSI) — persistent live view ─── */
+const STALE_THRESHOLD = 6000; // 6 seconds
 
-/* ─── Phase 3: Mapping (Photogrammetry + RSSI) ─── */
 const PhaseMapping: React.FC<{
   nodes: RegisteredNode[];
   calibrations: CalibrationData;
   rssiData: RssiData;
   onReset: () => void;
-}> = ({ nodes, calibrations, rssiData, onReset }) => {
+}> = ({ nodes, calibrations, rssiData: initialRssiData, onReset }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [liveRssiData, setLiveRssiData] = useState<RssiData>(initialRssiData);
+
+  // Poll RSSI every 2 seconds for live map updates
+  useEffect(() => {
+    const poll = () => {
+      fetch(`${SERVER_URL}/rssi`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && typeof data === 'object') {
+            setLiveRssiData(data);
+          }
+        })
+        .catch(() => {});
+    };
+
+    poll();
+    const interval = setInterval(poll, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Keep in sync if parent passes new data
+  useEffect(() => {
+    if (initialRssiData && Object.keys(initialRssiData).length > 0) {
+      setLiveRssiData(initialRssiData);
+    }
+  }, [initialRssiData]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -413,8 +386,6 @@ const PhaseMapping: React.FC<{
       let posY = roomY + roomH / 2;
 
       if (cal && Object.keys(cal).length >= 2) {
-        // Simple photogrammetry: average gyro across captured corners
-        // alpha offset from center -> X, beta offset -> Y
         let totalAlpha = 0;
         let totalBeta = 0;
         let count = 0;
@@ -430,17 +401,14 @@ const PhaseMapping: React.FC<{
         if (count > 0) {
           const avgAlpha = totalAlpha / count;
           const avgBeta = totalBeta / count;
-          // Normalize: alpha 0-360 maps to room width, beta -90 to 90 maps to room height
           const normalizedX = (avgAlpha % 360) / 360;
           const normalizedY = (avgBeta + 90) / 180;
           posX = roomX + normalizedX * roomW;
           posY = roomY + normalizedY * roomH;
-          // Clamp to room bounds
           posX = Math.max(roomX + 15, Math.min(roomX + roomW - 15, posX));
           posY = Math.max(roomY + 15, Math.min(roomY + roomH - 15, posY));
         }
       } else {
-        // Fallback: distribute evenly if no calibration data yet
         const angle = (idx / Math.max(nodes.length, 1)) * Math.PI * 2;
         posX = roomX + roomW / 2 + Math.cos(angle) * roomW * 0.3;
         posY = roomY + roomH / 2 + Math.sin(angle) * roomH * 0.3;
@@ -450,10 +418,10 @@ const PhaseMapping: React.FC<{
     });
 
     // Draw RSSI proximity lines between nodes
-    if (Object.keys(rssiData).length > 0) {
+    if (Object.keys(liveRssiData).length > 0) {
       const posMap = new Map(nodePositions.map(p => [p.nodeId, p]));
 
-      Object.values(rssiData).forEach((entry) => {
+      Object.values(liveRssiData).forEach((entry) => {
         const fromPos = posMap.get(entry.fromNodeId);
         if (!fromPos) return;
 
@@ -461,7 +429,6 @@ const PhaseMapping: React.FC<{
           const toPos = posMap.get(m.toNodeId);
           if (!toPos) return;
 
-          // Line opacity based on signal strength (stronger = more opaque)
           const strength = Math.min(1, Math.max(0.2, (m.rssi + 100) / 60));
           ctx.strokeStyle = `rgba(0, 191, 255, ${strength * 0.6})`;
           ctx.lineWidth = 1;
@@ -471,7 +438,6 @@ const PhaseMapping: React.FC<{
           ctx.lineTo(toPos.x, toPos.y);
           ctx.stroke();
 
-          // Distance label at midpoint
           const mx = (fromPos.x + toPos.x) / 2;
           const my = (fromPos.y + toPos.y) / 2;
           ctx.font = '8px monospace';
@@ -482,31 +448,44 @@ const PhaseMapping: React.FC<{
       ctx.setLineDash([]);
     }
 
-    // Draw nodes
+    // Draw nodes with health coloring (GREEN = active, RED = stale)
+    const now = Date.now();
     nodePositions.forEach((pos) => {
+      // Determine node health based on RSSI timestamp
+      const nodeRssi = liveRssiData[pos.nodeId];
+      const lastRssiTime = nodeRssi?.timestamp || 0;
+      const isActive = (now - lastRssiTime) < STALE_THRESHOLD;
+      const nodeColor = isActive ? '#00FF9C' : '#FF4040';
+
       // Outer ring
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-      ctx.strokeStyle = '#00FF9C40';
+      ctx.strokeStyle = isActive ? '#00FF9C40' : '#FF404040';
       ctx.lineWidth = 1;
       ctx.stroke();
       // Inner dot
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = '#00FF9C';
+      ctx.fillStyle = nodeColor;
       ctx.fill();
       // Label
       ctx.font = '9px monospace';
-      ctx.fillStyle = '#00FF9C';
+      ctx.fillStyle = nodeColor;
       ctx.fillText(pos.label, pos.x - 10, pos.y + 22);
+      // STALE label for red nodes
+      if (!isActive) {
+        ctx.font = 'bold 8px monospace';
+        ctx.fillStyle = '#FF4040';
+        ctx.fillText('STALE', pos.x - 14, pos.y - 16);
+      }
     });
 
     // Title
     ctx.font = 'bold 11px monospace';
     ctx.fillStyle = '#00FF9C';
-    ctx.fillText('TACTICAL MAP — PHOTOGRAMMETRY + RSSI MESH', roomX, roomY - 20);
+    ctx.fillText('TACTICAL MAP — LIVE RSSI MESH', roomX, roomY - 20);
 
-  }, [nodes, calibrations, rssiData]);
+  }, [nodes, calibrations, liveRssiData]);
 
   return (
     <div style={styles.mappingContainer}>
@@ -520,7 +499,8 @@ const PhaseMapping: React.FC<{
         <div style={styles.mappingLegend}>
           <div style={styles.legendItem}><span style={{ color: '#00FF9C' }}>━</span> Boundaries</div>
           <div style={styles.legendItem}><span style={{ color: '#00BFFF' }}>┅</span> RSSI Links</div>
-          <div style={styles.legendItem}><span style={{ color: '#00FF9C' }}>●</span> Nodes</div>
+          <div style={styles.legendItem}><span style={{ color: '#00FF9C' }}>●</span> Active</div>
+          <div style={styles.legendItem}><span style={{ color: '#FF4040' }}>●</span> Stale</div>
         </div>
         <button style={styles.resetBtn} onClick={onReset}>RESET</button>
       </div>
@@ -677,68 +657,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 700,
     letterSpacing: '4px',
     boxShadow: '0 0 25px rgba(0, 255, 156, 0.3)',
-    cursor: 'pointer',
-  },
-  deployCenter: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '16px',
-  },
-  scanningPulse: {
-    width: '50px',
-    height: '50px',
-    borderRadius: '50%',
-    backgroundColor: '#00FF9C',
-    opacity: 0.7,
-    boxShadow: '0 0 30px rgba(0, 255, 156, 0.6)',
-  },
-  deployTitle: {
-    fontSize: '20px',
-    fontWeight: 700,
-    letterSpacing: '3px',
-    color: '#00FF9C',
-  },
-  countdownDisplay: {
-    fontSize: '48px',
-    fontWeight: 700,
-    color: '#00BFFF',
-  },
-  rssiStatus: {
-    fontSize: '12px',
-    color: '#00BFFF',
-    letterSpacing: '1px',
-  },
-  scanningDevices: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    marginTop: '8px',
-  },
-  scanningDeviceRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    fontSize: '12px',
-  },
-  recordingLabel: {
-    color: '#FF4040',
-    fontSize: '10px',
-    fontWeight: 700,
-    letterSpacing: '2px',
-    marginLeft: 'auto',
-  },
-  skipBtn: {
-    marginTop: '16px',
-    padding: '10px 24px',
-    background: 'transparent',
-    border: '1px solid #00BFFF60',
-    borderRadius: '4px',
-    color: '#00BFFF',
-    fontFamily: '"JetBrains Mono", monospace',
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '1px',
     cursor: 'pointer',
   },
   mappingContainer: {

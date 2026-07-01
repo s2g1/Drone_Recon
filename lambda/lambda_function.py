@@ -152,13 +152,21 @@ def lambda_handler(event, context):
         from_node_id = body.get("fromNodeId", body.get("nodeId", ""))
         measurements = body.get("measurements", [])
         timestamp = body.get("timestamp", int(time.time() * 1000))
+        gyro = body.get("gyro", None)
+        plane_detection = body.get("planeDetection", None)
 
         rssi_data = _s3_read(RSSI_KEY, {})
-        rssi_data[from_node_id] = {
+        entry = {
             "fromNodeId": from_node_id,
             "measurements": measurements,
             "timestamp": timestamp,
         }
+        if gyro is not None:
+            entry["gyro"] = gyro
+        if plane_detection is not None:
+            entry["planeDetection"] = plane_detection
+
+        rssi_data[from_node_id] = entry
         _s3_write(RSSI_KEY, rssi_data)
 
         # Update node status

@@ -35,6 +35,8 @@ interface RssiData {
     fromNodeId: string;
     measurements: RssiMeasurement[];
     timestamp: number;
+    gyro?: { alpha: number; beta: number; gamma: number };
+    planeDetection?: { type: string; confidence: number; region: string };
   };
 }
 
@@ -181,6 +183,7 @@ export const App: React.FC = () => {
           <PhaseRegisterCalibrate
             nodes={nodes}
             loaded={loaded}
+            rssiData={rssiData}
             getCalibrationCount={getCalibrationCount}
             getStatusColor={getStatusColor}
             getStatusLabel={getStatusLabel}
@@ -194,7 +197,7 @@ export const App: React.FC = () => {
       </div>
 
       <div style={styles.footer}>
-        <span>ARGUS TACTICAL SYSTEM v2.2</span>
+        <span>ARGUS TACTICAL SYSTEM v2.3</span>
         <span>{OPERATOR_KEY}</span>
         <span>NODES: {nodes.length}</span>
       </div>
@@ -206,12 +209,16 @@ export const App: React.FC = () => {
 const PhaseRegisterCalibrate: React.FC<{
   nodes: RegisteredNode[];
   loaded: boolean;
+  rssiData: RssiData;
   getCalibrationCount: (nodeId: string) => number;
   getStatusColor: (status: string) => string;
   getStatusLabel: (node: RegisteredNode) => string;
   onDeploy: () => void;
   onReset: () => void;
-}> = ({ nodes, loaded, getCalibrationCount, getStatusColor, getStatusLabel, onDeploy, onReset }) => {
+}> = ({ nodes, loaded, rssiData, getCalibrationCount, getStatusColor, getStatusLabel, onDeploy, onReset }) => {
+  const STALE_THRESHOLD_CAL = 6000;
+  const now = Date.now();
+
   return (
   <div style={styles.phaseContainer}>
     {/* Corner number markers for calibration */}
@@ -251,9 +258,14 @@ const PhaseRegisterCalibrate: React.FC<{
             <div style={styles.noDevices}>No devices registered yet. Scan QR to begin.</div>
           )}
           {nodes.map((node, i) => {
-            const statusColor = getStatusColor(node.status);
-            const statusLabel = getStatusLabel(node);
-            const isDimmed = node.status === 'DISCONNECTED';
+            // Stale detection: if node has RSSI data and timestamp is older than threshold
+            const nodeRssi = rssiData[node.nodeId];
+            const hasRssiData = nodeRssi && nodeRssi.timestamp > 0;
+            const isStale = hasRssiData && (now - nodeRssi.timestamp) > STALE_THRESHOLD_CAL;
+
+            const statusColor = isStale ? '#FF4040' : getStatusColor(node.status);
+            const statusLabel = isStale ? 'STALE' : getStatusLabel(node);
+            const isDimmed = node.status === 'DISCONNECTED' && !isStale;
             return (
               <div key={node.nodeId} style={{ ...styles.deviceRow, opacity: isDimmed ? 0.5 : 1 }}>
                 <div style={{
@@ -378,14 +390,25 @@ const PhaseMapping: React.FC<{
     });
 
     // Compute node positions from gyro calibration data (photogrammetry)
+    // If live gyro from RSSI is available, use it for real-time movement
     const nodePositions: { x: number; y: number; nodeId: string; label: string }[] = [];
 
     nodes.forEach((node, idx) => {
       const cal = calibrations[node.nodeId];
+      const nodeRssi = liveRssiData[node.nodeId];
       let posX = roomX + roomW / 2;
       let posY = roomY + roomH / 2;
 
-      if (cal && Object.keys(cal).length >= 2) {
+      // Prefer live gyro from RSSI data (real-time movement)
+      if (nodeRssi && nodeRssi.gyro) {
+        const liveGyro = nodeRssi.gyro;
+        const normalizedX = (liveGyro.alpha % 360) / 360;
+        const normalizedY = (liveGyro.beta + 90) / 180;
+        posX = roomX + normalizedX * roomW;
+        posY = roomY + normalizedY * roomH;
+        posX = Math.max(roomX + 15, Math.min(roomX + roomW - 15, posX));
+        posY = Math.max(roomY + 15, Math.min(roomY + roomH - 15, posY));
+      } else if (cal && Object.keys(cal).length >= 2) {
         let totalAlpha = 0;
         let totalBeta = 0;
         let count = 0;
@@ -478,6 +501,18 @@ const PhaseMapping: React.FC<{
         ctx.fillStyle = '#FF4040';
         ctx.fillText('STALE', pos.x - 14, pos.y - 16);
       }
+      // Plane detection warning indicator
+      if (nodeRssi?.planeDetection) {
+        const pd = nodeRssi.planeDetection;
+        // Yellow warning triangle
+        ctx.font = '14px sans-serif';
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText('⚠', pos.x + 14, pos.y - 4);
+        // Plane type label
+        ctx.font = 'bold 8px monospace';
+        ctx.fillStyle = '#FFD700';
+        ctx.fillText(pd.type, pos.x + 14, pos.y + 8);
+      }
     });
 
     // Title
@@ -501,6 +536,7 @@ const PhaseMapping: React.FC<{
           <div style={styles.legendItem}><span style={{ color: '#00BFFF' }}>┅</span> RSSI Links</div>
           <div style={styles.legendItem}><span style={{ color: '#00FF9C' }}>●</span> Active</div>
           <div style={styles.legendItem}><span style={{ color: '#FF4040' }}>●</span> Stale</div>
+          <div style={styles.legendItem}><span style={{ color: '#FFD700' }}>⚠</span> Plane</div>
         </div>
         <button style={styles.resetBtn} onClick={onReset}>RESET</button>
       </div>

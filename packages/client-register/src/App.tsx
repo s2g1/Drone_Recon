@@ -203,9 +203,103 @@ function App() {
     } catch {}
   };
 
+  // Plane detection: analyze a video frame for large uniform brightness areas
+  const detectPlane = useCallback((): { type: string; confidence: number; region: string } | null => {
+    const videoEl = videoRef.current;
+    if (!videoEl || !canvasRef.current) return null;
+    const canvas = canvasRef.current;
+    const width = 160; // downsample for performance
+    const height = 120;
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+    ctx.drawImage(videoEl, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const pixels = imageData.data;
+
+    // Divide into 4x4 grid, compute average brightness per cell
+    const gridCols = 4;
+    const gridRows = 4;
+    const cellW = Math.floor(width / gridCols);
+    const cellH = Math.floor(height / gridRows);
+    const cellBrightness: number[][] = [];
+
+    for (let row = 0; row < gridRows; row++) {
+      cellBrightness[row] = [];
+      for (let col = 0; col < gridCols; col++) {
+        let sum = 0;
+        let count = 0;
+        const startX = col * cellW;
+        const startY = row * cellH;
+        for (let y = startY; y < startY + cellH; y++) {
+          for (let x = startX; x < startX + cellW; x++) {
+            const i = (y * width + x) * 4;
+            const brightness = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+            sum += brightness;
+            count++;
+          }
+        }
+        cellBrightness[row][col] = sum / count;
+      }
+    }
+
+    // Check each cell against its neighbors for uniformity (diff < 10)
+    const uniformCells: { row: number; col: number }[] = [];
+    for (let row = 0; row < gridRows; row++) {
+      for (let col = 0; col < gridCols; col++) {
+        const val = cellBrightness[row][col];
+        let isUniform = false;
+        // Check adjacent neighbors
+        const neighbors = [
+          [row - 1, col], [row + 1, col], [row, col - 1], [row, col + 1]
+        ];
+        for (const [nr, nc] of neighbors) {
+          if (nr >= 0 && nr < gridRows && nc >= 0 && nc < gridCols) {
+            if (Math.abs(val - cellBrightness[nr][nc]) < 10) {
+              isUniform = true;
+              break;
+            }
+          }
+        }
+        if (isUniform) {
+          uniformCells.push({ row, col });
+        }
+      }
+    }
+
+    if (uniformCells.length < 3) return null; // not enough uniform area
+
+    // Classify by region
+    const topCells = uniformCells.filter(c => c.row < 2);
+    const bottomCells = uniformCells.filter(c => c.row >= 2);
+    const middleCells = uniformCells.filter(c => c.row >= 1 && c.row <= 2);
+
+    const confidence = Math.min(1, uniformCells.length / 10);
+
+    if (topCells.length >= 4) {
+      return { type: 'WALL', confidence, region: 'top' };
+    }
+    if (bottomCells.length >= 4) {
+      return { type: 'FLOOR', confidence, region: 'bottom' };
+    }
+    if (middleCells.length >= 4) {
+      return { type: 'TABLE', confidence, region: 'middle' };
+    }
+
+    return null;
+  }, []);
+
   // Continuous RSSI ping every 2 seconds while in scanning state
   useEffect(() => {
     if (step !== 'scanning') return;
+
+    let planeDetectionResult: { type: string; confidence: number; region: string } | null = null;
+
+    // Plane detection every 3 seconds
+    const planeInterval = setInterval(() => {
+      planeDetectionResult = detectPlane();
+    }, 3000);
 
     const interval = setInterval(async () => {
       const nodes = await fetchAllNodes();
@@ -216,19 +310,24 @@ function App() {
         distance: Math.round((10 ** ((-40 - (-40 - Math.floor(Math.random() * 30) - (idx * 3))) / 20)) * 100) / 100,
       }));
 
+      const payload: any = { fromNodeId: nodeId, measurements, timestamp: Date.now(), gyro: gyroRef.current };
+      if (planeDetectionResult) {
+        payload.planeDetection = planeDetectionResult;
+      }
+
       try {
         await fetch(`${serverUrl}/rssi`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fromNodeId: nodeId, measurements, timestamp: Date.now() }),
+          body: JSON.stringify(payload),
         });
       } catch {}
 
       setRssiResults(measurements);
     }, 2000);
 
-    return () => clearInterval(interval);
-  }, [step, nodeId, serverUrl]);
+    return () => { clearInterval(interval); clearInterval(planeInterval); };
+  }, [step, nodeId, serverUrl, detectPlane]);
 
   const cornerNames = ['TOP-LEFT', 'TOP-RIGHT', 'BOTTOM-RIGHT', 'BOTTOM-LEFT'];
 

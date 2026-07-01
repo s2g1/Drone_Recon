@@ -18,6 +18,24 @@ The BMS screen shows:
 
 ---
 
+## Tactical Map View
+
+![BMS Tactical Map](../docs/screenshots/bms-tactical-map.png)
+
+After clicking DEPLOY, the MAP tab shows the live tactical view:
+- **Green nodes** — Active, sending RSSI pings within the last 6 seconds
+- **Red nodes** — Stale, no RSSI response received for 6+ seconds
+- **Yellow ⚠ triangles** — Plane detection warnings (WALL, FLOOR, TABLE) from edge device image processing
+- **Blue dashed lines** — RSSI proximity links between nodes with distance labels
+- **Green boundary** — Room perimeter defined by the 4 calibration corners
+- **Corner labels** — 1-TL, 2-TR, 3-BR, 4-BL at room boundaries
+- **Legend** — Boundaries, RSSI Links, Active, Stale, Plane indicators
+- **RESET button** — Returns to registration phase and clears all data
+
+Nodes move on the map in real-time as devices physically change position (tracked via gyroscope orientation changes in the continuous RSSI pings).
+
+---
+
 ## Table of Contents
 
 1. [System Overview](#system-overview)

@@ -6,6 +6,8 @@ Built in a single session using AI-assisted development with Kiro.
 
 ![BMS Calibration Screen](docs/screenshots/bms-calibration.png)
 
+![BMS Tactical Map — Live RSSI Mesh](docs/screenshots/bms-tactical-map.png)
+
 ## Demo
 
 > Recording of live demo with multiple devices will be added here after testing.

@@ -4,6 +4,20 @@
 
 ---
 
+## BMS Interface
+
+![BMS Calibration Screen](../docs/screenshots/bms-calibration.png)
+
+The BMS screen shows:
+- **Corner markers (1-4)** — Large green numbered circles at screen corners for device calibration
+- **QR Code** — Scan with any phone to register as an edge node
+- **Device list** — Shows all registered nodes with status (REGISTERED/CALIBRATING/CALIBRATED/STALE)
+- **DEPLOY button** — Activates all edge device cameras and RSSI scanning
+- **RESET DEMO** — Clears all registered devices and state
+- **CALIBRATE/MAP tabs** — Switch between registration view and live tactical map
+
+---
+
 ## Table of Contents
 
 1. [System Overview](#system-overview)

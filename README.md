@@ -10,9 +10,11 @@ Built in a single session using AI-assisted development with Kiro.
 
 ## Demo
 
-> Recording of live demo with multiple devices will be added here after testing.
+> Live demo with multiple edge devices registered and tracked in real-time.
 
-![Live Demo](docs/screenshots/demo-recording.gif)
+![Multi-User Calibration Screen](docs/screenshots/Calibration%20Screen%20multi%20user.PNG)
+
+![Multi-User Tactical Map](docs/screenshots/Map%20Screen%20multi%20user.PNG)
 
 ## How It Works
 
